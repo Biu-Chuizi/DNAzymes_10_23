@@ -161,6 +161,9 @@ data.to.fit.2$Energy <- data.to.fit.2$Energy * (-1)
 data.to.fit.2$Dimer <- as.numeric(as.character(data.to.fit.2$Dimer)) * (-1)
 data.to.fit.2$Internal <- as.numeric(as.character(data.to.fit.2$Internal)) * (-1)
 
+single.prob <- predict(fit_logit_DZ.Cairns20, newdata=data.to.fit.2, type="response")
+single.pred <- ifelse(single.prob > 0.5, 1, 0)
+single.pred
 multiple.prob <- predict(fit_logit_DZ.Cairns_multiple, newdata=data.to.fit.2, type="response")
 multiple.pred <- ifelse(multiple.prob > 0.5, 1, 0)
 multiple.pred

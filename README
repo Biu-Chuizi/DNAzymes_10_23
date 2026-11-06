@@ -18,6 +18,38 @@ run_analysis_DNAzymes.R
 This is a R script containing the code to reproduce all the statistical analysis described in the main paper. It also produces figures 2 and 3. The default input file is also provided as 'HPV_FullLength.tab'
 
 
+Screening DNAzymes for your own target
+======================================
+The two scripts above cover enumeration and the published statistical analysis.
+Two helper scripts bridge the gap between them, so that a FASTA of any transcript
+can be turned into a shortlist worth ordering:
+
+  perl   DNAzyme_scan.pl     -i MYTARGET.fa -o scan.tab
+  perl   screen_dnazymes.pl  -i scan.tab    -o shortlist
+  python compute_features.py shortlist_dnazymes.fa -o features.tab
+
+screen_dnazymes.pl (added) ranks the candidates from DNAzyme_scan.pl and drops the
+ones that are impractical to synthesise: per-arm GC outside 20-80%, runs of more
+than five identical bases, and weakly binding arms. It writes the full ranked table
+plus a FASTA of the survivors.
+
+compute_features.py (added) recomputes the thermodynamic features with the ViennaRNA
+Package (pip install ViennaRNA), using the same energy set as the paper, i.e. the
+Mathews 2004 DNA parameters with --noLP. It needs no external parameter file.
+
+Why the extra step: the DeltaG reported by DNAzyme_scan.pl is the nearest-neighbour
+energy of the arms hybridised to a perfectly accessible target. It ignores the
+folding of the DNAzyme itself, the secondary structure of the target site, and the
+catalytic step. Measured against the 38 HPV16 DNAzymes with published cleavage data
+in HPV_FullLength.tab, that DeltaG does not separate good from poor DNAzymes at all
+(AUC 0.48, i.e. chance), whereas the intramolecular folding energy of the DNAzyme
+does (AUC 0.67). Ordering the 38 by folding energy puts 7 of the 11 good ones in the
+top 15; ordering them by DeltaG puts only 4 of 11. compute_features.py reproduces the
+'Internal' column of HPV_FullLength.tab exactly (maximum deviation 0.00 kcal/mol),
+which is the check that its parameters match those used in the paper.
+
+Both helpers are provided under the GPLv3 license, like run_analysis_DNAzymes.R, and
+are not subject to the CC BY-NC-ND terms that apply to DNAzyme_scan.pl.
 
 
 Antonio Marco, 2022
